@@ -15,12 +15,12 @@ const RightSidebar = ({
   const resolveAvatar = (avatar) => {
     if (!avatar) return assets.profile_img;
     if (avatar.startsWith("http")) return avatar;
-    return `${process.env.REACT_APP_API_URL}${avatar}`;
+    return `${import.meta.env.VITE_API_URL}${avatar}`;
   };
 
   const mediaImages = messages
     ?.filter((msg) => msg.image)
-    .map((msg) => `${process.env.REACT_APP_API_URL}${msg.image}`);
+    .map((msg) => `${import.meta.env.VITE_API_URL}${msg.image}`);
 
   const handleLogout = () => {
     localStorage.removeItem("userInfo");
@@ -35,10 +35,7 @@ const RightSidebar = ({
           <>
             <div className="rs-profile">
               <img src={resolveAvatar(currentChatUser.avatar)} alt="" />
-              <h3>
-                {currentChatUser.name}
-                <img src={assets.green_dot} alt="" className="dot" />
-              </h3>
+              <h3>{currentChatUser.name}</h3>
               <p>
                 {currentChatUser.bio
                   ? currentChatUser.bio
