@@ -15,7 +15,7 @@ const LeftSidebar = ({ setCurrentChatUser, loggedInUser, setLoggedInUser }) => {
 
     const fetchUsers = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/users", {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/users`, {
           headers: { Authorization: `Bearer ${loggedInUser.token}` },
         });
 

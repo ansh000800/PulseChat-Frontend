@@ -15,12 +15,12 @@ const RightSidebar = ({
   const resolveAvatar = (avatar) => {
     if (!avatar) return assets.profile_img;
     if (avatar.startsWith("http")) return avatar;
-    return `http://localhost:5000${avatar}`;
+    return `${process.env.REACT_APP_API_URL}${avatar}`;
   };
 
   const mediaImages = messages
     ?.filter((msg) => msg.image)
-    .map((msg) => `http://localhost:5000${msg.image}`);
+    .map((msg) => `${process.env.REACT_APP_API_URL}${msg.image}`);
 
   const handleLogout = () => {
     localStorage.removeItem("userInfo");
