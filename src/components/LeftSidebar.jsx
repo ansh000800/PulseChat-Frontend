@@ -1,8 +1,8 @@
-// LeftSidebar.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import "./LeftSidebar.css";
 import assets from "../assets/assets";
 import { useNavigate } from "react-router-dom";
+import API from "../services/api"; // ✅ import API instance
 
 const LeftSidebar = ({ setCurrentChatUser, loggedInUser, setLoggedInUser }) => {
   const [users, setUsers] = useState([]);
@@ -15,13 +15,9 @@ const LeftSidebar = ({ setCurrentChatUser, loggedInUser, setLoggedInUser }) => {
 
     const fetchUsers = async () => {
       try {
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/users`, {
-          headers: { Authorization: `Bearer ${loggedInUser.token}` },
-        });
-
-        const data = await res.json();
-
-        setUsers(data.filter((user) => user._id !== loggedInUser._id));
+        // ✅ Using API instance instead of fetch
+        const res = await API.get("/users");
+        setUsers(res.data.filter((user) => user._id !== loggedInUser._id));
       } catch (error) {
         console.error("Failed to fetch users:", error);
       }
@@ -30,7 +26,6 @@ const LeftSidebar = ({ setCurrentChatUser, loggedInUser, setLoggedInUser }) => {
     fetchUsers();
   }, [loggedInUser]);
 
-  // ✅ Real-time search filtering (case insensitive)
   const filteredUsers = useMemo(() => {
     return users.filter((user) =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()),

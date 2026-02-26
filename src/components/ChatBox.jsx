@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ChatBox.css";
 import assets from "../assets/assets";
+import API from "../services/api"; // ✅ use API instance instead of fetch
 
 const ChatBox = ({
   currentChatUser,
@@ -16,29 +17,25 @@ const ChatBox = ({
   const scrollRef = useRef();
   const navigate = useNavigate();
 
-  // Helper to resolve avatar path correctly
   const resolveAvatar = (avatar) => {
     if (!avatar) return assets.profile_img;
-    if (avatar.startsWith("http")) return avatar; // Cloudinary
-    return `http://localhost:5000${avatar}`; // local upload
+    if (avatar.startsWith("http")) return avatar;
+    return `${import.meta.env.VITE_API_URL}${avatar}`;
   };
 
   useEffect(() => {
     const fetchMessages = async () => {
       if (!currentChatUser) return;
+
       try {
-        const res = await fetch(
-          `http://localhost:5000/api/messages/${currentChatUser._id}`,
-          {
-            headers: { Authorization: `Bearer ${loggedInUser.token}` },
-          },
-        );
-        const data = await res.json();
-        setMessages(data.reverse());
+        // ✅ Using API instance instead of fetch
+        const res = await API.get(`/messages/${currentChatUser._id}`);
+        setMessages(res.data.reverse());
       } catch (error) {
         console.error("Failed to fetch messages:", error);
       }
     };
+
     fetchMessages();
   }, [currentChatUser, loggedInUser]);
 
@@ -67,28 +64,16 @@ const ChatBox = ({
         formData.append("image", selectedImage);
         formData.append("receiverId", currentChatUser._id);
 
-        const res = await fetch("http://localhost:5000/api/messages/image", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${loggedInUser.token}` },
-          body: formData,
-        });
-
-        savedMessage = await res.json();
+        // ✅ Use API instance with FormData
+        const res = await API.post("/messages/image", formData);
+        savedMessage = res.data;
         setSelectedImage(null);
       } else {
-        const res = await fetch("http://localhost:5000/api/messages", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${loggedInUser.token}`,
-          },
-          body: JSON.stringify({
-            receiverId: currentChatUser._id,
-            text: newMessage,
-          }),
+        const res = await API.post("/messages", {
+          receiverId: currentChatUser._id,
+          text: newMessage,
         });
-
-        savedMessage = await res.json();
+        savedMessage = res.data;
       }
 
       setMessages((prev) => [...prev, savedMessage]);
@@ -150,7 +135,6 @@ const ChatBox = ({
       <div className="chat-msg">
         {messages.map((msg) => {
           const isSender = msg.sender.toString() === loggedInUser?._id;
-
           const avatarSrc = isSender
             ? resolveAvatar(loggedInUser?.avatar)
             : resolveAvatar(currentChatUser?.avatar);
@@ -166,7 +150,7 @@ const ChatBox = ({
               {msg.image && (
                 <img
                   className="msg-img"
-                  src={`http://localhost:5000${msg.image}`}
+                  src={`${import.meta.env.VITE_API_URL}${msg.image}`}
                   alt=""
                 />
               )}
